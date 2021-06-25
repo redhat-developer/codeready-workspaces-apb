@@ -33,7 +33,10 @@ if [[ ! -x $PODMAN ]]; then
   fi
 fi
 
+set -e
+
 ${PODMAN} run --rm -v $SCRIPT_DIR/target/python-ls:/tmp/python -u root ${PYTHON_IMAGE} sh -c "
+    set -e
     /usr/bin/python3 --version && /usr/bin/python3 -m pip --version && \
     /usr/bin/python3 -m pip install -q --upgrade  --no-warn-script-location pip && \
     /usr/bin/python3 -m pip install -q --no-warn-script-location python-language-server[all]==${PYTHON_LS_VERSION} ptvsd jedi wrapt --prefix=/tmp/python && \
@@ -44,6 +47,14 @@ ${PODMAN} run --rm -v $SCRIPT_DIR/target/python-ls:/tmp/python -u root ${PYTHON_
     export PATH=\${PATH}:/tmp/python/bin
     ls -1 /tmp/python/bin
     # cat /tmp/python/bin/pylint
+    mkdir -p /home/jboss;
+    cd /home/jboss;
+    /usr/bin/python3 -m venv .venv;
+    source .venv/bin/activate;
+    pip install -U ipykernel jupyter;
+    python3 -m ipykernel install --name=.venv --user;
+    deactivate;
+    mv .venv /tmp/python/
     "
 tar -czf target/codeready-workspaces-stacks-language-servers-dependencies-python-$(uname -m).tar.gz -C target/python-ls .
 
